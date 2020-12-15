@@ -53,7 +53,7 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
 
 
   //assign next_state = (state == S_OFF) ? on : (rst_state ? S_OFF : state);
-  always @* begin
+  always @(posedge clk, posedge rst) begin
     case (state)
       S_OFF: next_state <= on;
       S_ELIST: if (start == 1) begin
@@ -130,6 +130,7 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
 
   assign regime = state;
 
+  // вместо * мб state, или pos clk, или хз
   always @* begin
     next_timer = 0;
     if ((state % 4 == S_ELIST) && (state != S_ELIST)) next_timer = 3;

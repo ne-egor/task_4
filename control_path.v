@@ -31,10 +31,12 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
              S_UP_3 = S_UPDATE + 8;
   reg [1:0] state; 
   reg [1:0] next_state;
-  wire rst_state;
+
   reg [1:0] timer, next_timer;
   
   /* КОД УПРАВЛЯЮЩЕГО АВТОМАТА */
+  assign regime = state;
+
 
   always @(posedge clk, posedge rst)
     if (rst) begin
@@ -126,9 +128,6 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
   end
 
 
-
-
-  assign regime = state;
 
   // вместо * мб state, или pos clk, или хз
   always @* begin

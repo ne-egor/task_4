@@ -55,75 +55,78 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
 
 
   //assign next_state = (state == S_OFF) ? on : (rst_state ? S_OFF : state);
-  always @(posedge clk, posedge rst) begin
-    case (state)
-      S_OFF: next_state <= on;
-      S_ELIST: if (start == 1) begin
-        active <= 1;
-        next_state <= S_6;
-      end
-      S_6: begin
-        next_state <= S_4;
-        //set s = 6;
-        s_en <= 1;
-        s_add <= 0;
-        s_step <= 2;
-        s_zero <= 1;
-      end
-      S_4: begin
-        next_state <= S_2;
-        //set s = 4;
-        // !!! only modify 6 to 4, mb change @* (ubrat timer), inache neskolko raz povtorit modif
-        // !!!!!!!!!!!!!!!!!!
-        s_zero <= 0; 
-      end
-      S_2: begin
-        next_state <= S_0;
-        //set s = 6;
-      end
-      S_0: begin
-        next_state <= S_OFF;
-        active <= 0;
-
-        // нужно выставить s = 6, мб новый state нужен
-        //set s = 6;
-      end
-      S_CNT: if (start == 0)
-        next_state <= S_OFF;
-        else begin
-        //s <= s + 1;
-        s_zero <= 0;
-        s_add <= 1;
-        s_step <= 1;
-        s_en <= 1;
-        //if (s + 1) == 3   y <= y + 1
-        if (y_inc) begin
-          y_select_next <= 1;
-          y_store_x <= 0;
-          y_en <= 1;
+  always @(posedge clk) begin
+    if (!rst)
+      case (state)
+        S_OFF: next_state <= on;
+        S_ELIST: if (start == 1) begin
+          active <= 1;
+          next_state <= S_6;
         end
-      end
-      S_UPDATE: begin
-        y_store_x <= 1;
-        y_en <= 1;
-        next_state <= S_UP_2;
-      end
-      S_UP_2: begin
-        y_store_x <= 0;
-        y_select_next <= 2'd2;
-        next_state <= S_UP_3;
-      end
-      S_UP_3: begin
-        y_en <= 0;
-        s_zero <= 0;
-        s_step <= 1;
-        s_add <= 0;
+        S_6: begin
+          next_state <= S_4;
+          //set s = 6;
+          s_en <= 1;
+          s_add <= 0;
+          s_step <= 2;
+          s_zero <= 1;
+        end
+        S_4: begin
+          next_state <= S_2;
+          //set s = 4;
+          // !!! only modify 6 to 4, mb change @* (ubrat timer), inache neskolko raz povtorit modif
+          // !!!!!!!!!!!!!!!!!!
+          s_zero <= 0; 
+        end
+        S_2: begin
+          next_state <= S_0;
+          //set s = 6;
+        end
+        S_0: begin
+          next_state <= S_OFF;
+          active <= 0;
 
-        next_state <= S_OFF;
-      end
-      default: next_state <= state;
-    endcase // state
+          // нужно выставить s = 6, мб новый state нужен
+          //set s = 6;
+        end
+        S_CNT: if (start == 0)
+          next_state <= S_OFF;
+          else begin
+          //s <= s + 1;
+          s_zero <= 0;
+          s_add <= 1;
+          s_step <= 1;
+          s_en <= 1;
+          //if (s + 1) == 3   y <= y + 1
+          if (y_inc) begin
+            y_select_next <= 1;
+            y_store_x <= 0;
+            y_en <= 1;
+          end
+        end
+        S_UPDATE: begin
+          y_store_x <= 1;
+          y_en <= 1;
+          next_state <= S_UP_2;
+        end
+        S_UP_2: begin
+          y_store_x <= 0;
+          y_select_next <= 2'd2;
+          next_state <= S_UP_3;
+        end
+        S_UP_3: begin
+          y_en <= 0;
+          s_zero <= 0;
+          s_step <= 1;
+          s_add <= 0;
+          s_en <= 1;
 
+          next_state <= S_OFF;
+        end
+        default: next_state <= state;
+      endcase // state
+    else
+      next_state <= state;
 
   end
 

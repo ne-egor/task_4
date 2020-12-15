@@ -15,6 +15,7 @@ module main(x, y, s, b, on, start, regime, active, clk, rst);
   wire y_en, s_en, y_store_x, s_add, s_zero;
   
   /* ОБЪЯВЛЕНИЯ ТОЧЕК */
+  wire y_inc;
   
   data_path _data_path(
     // данные
@@ -32,8 +33,9 @@ module main(x, y, s, b, on, start, regime, active, clk, rst);
     .s_zero(s_zero),
     // такт и сброс
     .clk(clk),
-    .rst(rst)
+    .rst(rst),
     /* ДОБАВЛЕННЫЕ ПОРТЫ */
+    .y_inc(y_inc)
   );
   control_path _control_path(
     // подключения к портам схемы
@@ -51,7 +53,8 @@ module main(x, y, s, b, on, start, regime, active, clk, rst);
     .s_zero(s_zero),
     // такт и сброс
     .clk(clk),
-    .rst(rst)
+    .rst(rst),
     /* ДОБАВЛЕННЫЕ ПОРТЫ */
+    .y_inc(y_inc)
   );
 endmodule

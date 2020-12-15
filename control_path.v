@@ -2,8 +2,8 @@
 // Сами объявления дописывать под соответствующим комментарием после имеющихся объявлений портов. Комментарий не стирать.
 // Реализацию управляющего автомата дописывать под соответствующим комментарием в конце модуля. Комментарий не стирать.
 // По необходимости можно раскомментировать ключевые слова "reg" в объявлениях портов.
-module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en, y_store_x, s_add, s_zero, clk, rst 
-            /* , ... (ИМЕНА НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */);
+module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en, y_store_x, s_add, s_zero, clk, rst, 
+      y_inc      /* , ... (ИМЕНА НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */);
   
   input [1:0] on;
   input start, clk, rst;
@@ -19,6 +19,8 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
   output reg s_zero;
   
   /* ОБЪЯВЛЕНИЯ НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */
+  input y_inc;
+
   localparam S_OFF = 0, S_ELIST = 1, S_CNT = 2, S_UPDATE = 3;
   localparam S_6 = S_ELIST + 4, 
              S_4 = S_ELIST + 8,
@@ -41,6 +43,12 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
     end else if (timer == 0) begin
       state <= next_state;
       timer <= next_timer;
+      if (state == S_0) begin
+        s_en <= 1;
+        s_add <= 0;
+        s_step <= 2;
+        s_zero <= 1;
+      end
     end else timer <= timer - 1;
 
 
@@ -82,7 +90,16 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
         next_state <= S_OFF;
         else begin
         //s <= s + 1;
+        s_zero <= 0;
+        s_add <= 1;
+        s_step <= 1;
+        s_en <= 1;
         //if (s + 1) == 3   y <= y + 1
+        if (y_inc) begin
+          y_select_next <= 1;
+          y_store_x <= 0;
+          y_en <= 1;
+        end
       end
       S_UPDATE: begin
         y_store_x <= 1;

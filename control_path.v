@@ -29,8 +29,9 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
 
              S_UP_2 = S_UPDATE + 4,
              S_UP_3 = S_UPDATE + 8;
-  reg [1:0] state; 
-  reg [1:0] next_state;
+  
+  reg [3:0] state; 
+  reg [3:0] next_state;
 
   reg [1:0] timer, next_timer;
   
@@ -45,7 +46,7 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
     end else if (timer == 0) begin
       state <= next_state;
       timer <= next_timer;
-      if (state == S_0) begin
+      if (state == S_0) begin  /// <---- возможно ошибка, старый стейт
         s_en <= 1;
         s_add <= 0;
         s_step <= 2;

@@ -3,12 +3,12 @@
 // Реализацию управляющего автомата дописывать под соответствующим комментарием в конце модуля. Комментарий не стирать.
 // По необходимости можно раскомментировать ключевые слова "reg" в объявлениях портов.
 module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en, y_store_x, s_add, s_zero, clk, rst, 
-      y_inc      /* , ... (ИМЕНА НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */);
+      y_inc, real_state     /* , ... (ИМЕНА НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */);
   
   input [1:0] on;
   input start, clk, rst;
   
-  output [1:0] regime;
+  output reg [1:0] regime;
   output reg active;
   output reg [1:0] y_select_next;
   output reg [1:0] s_step;
@@ -20,6 +20,7 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
   
   /* ОБЪЯВЛЕНИЯ НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */
   input y_inc;
+  output reg [3:0] real_state;
 
   localparam S_OFF = 0, S_ELIST = 1, S_CNT = 2, S_UPDATE = 3;
   localparam S_6 = S_ELIST + 4, 
@@ -28,44 +29,39 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
              S_0 = S_ELIST + 16,
 
              S_UP_2 = S_UPDATE + 4,
-             S_UP_3 = S_UPDATE + 8;
+             S_UP_3 = S_UPDATE + 8,
+             S_UP_F = S_UPDATE + 12;
   
   reg [3:0] state; 
-  reg [3:0] next_state;
+  //reg [3:0] state;
 
   reg [1:0] timer, next_timer;
   
   /* КОД УПРАВЛЯЮЩЕГО АВТОМАТА */
-  assign regime = state;
+  // assign regime = state;
+  // assign real_state = state;
 
 
-  always @(posedge clk, posedge rst)
+  always @(posedge clk, posedge rst) begin
+    regime <= state;
+    real_state <= state;
     if (rst) begin
       state <= S_OFF;
       timer <= 0;
     end else if (timer == 0) begin
-      state <= next_state;
-      timer <= next_timer;
-      if (state == S_0) begin  /// <---- возможно ошибка, старый стейт
-        s_en <= 1;
-        s_add <= 0;
-        s_step <= 2;
-        s_zero <= 1;
-      end
-    end else timer <= timer - 1;
-
-
-  //assign next_state = (state == S_OFF) ? on : (rst_state ? S_OFF : state);
-  always @(posedge clk) begin
-    if (!rst)
+      //state <= state;
       case (state)
-        S_OFF: next_state <= on;
+        S_OFF: begin 
+          state <= on;
+          s_en <= 0;
+          y_en <= 0;
+        end
         S_ELIST: if (start == 1) begin
           active <= 1;
-          next_state <= S_6;
+          state <= S_6;
         end
         S_6: begin
-          next_state <= S_4;
+          state <= S_4;
           //set s = 6;
           s_en <= 1;
           s_add <= 0;
@@ -73,25 +69,25 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
           s_zero <= 1;
         end
         S_4: begin
-          next_state <= S_2;
+          state <= S_2;
           //set s = 4;
           // !!! only modify 6 to 4, mb change @* (ubrat timer), inache neskolko raz povtorit modif
           // !!!!!!!!!!!!!!!!!!
           s_zero <= 0; 
         end
         S_2: begin
-          next_state <= S_0;
+          state <= S_0;
           //set s = 6;
         end
         S_0: begin
-          next_state <= S_OFF;
+          state <= S_OFF;
           active <= 0;
 
           // нужно выставить s = 6, мб новый state нужен
           //set s = 6;
         end
         S_CNT: if (start == 0)
-          next_state <= S_OFF;
+          state <= S_OFF;
           else begin
           //s <= s + 1;
           s_zero <= 0;
@@ -105,15 +101,16 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
             y_en <= 1;
           end
         end
+
         S_UPDATE: begin
           y_store_x <= 1;
           y_en <= 1;
-          next_state <= S_UP_2;
+          state <= S_UP_2;
         end
         S_UP_2: begin
           y_store_x <= 0;
           y_select_next <= 2'd2;
-          next_state <= S_UP_3;
+          state <= S_UP_3;
         end
         S_UP_3: begin
           y_en <= 0;
@@ -122,14 +119,29 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
           s_add <= 0;
           s_en <= 1;
 
-          next_state <= S_OFF;
+          state <= S_UP_F;
         end
-        default: next_state <= state;
+        S_UP_F: begin
+          s_en <= 0;
+          state <= S_OFF;
+        end
+        default: state <= state;
       endcase // state
-    else
-      next_state <= state;
-
+      timer <= next_timer;
+      /*
+      if (state == S_0) begin  /// <---- возможно ошибка, старый стейт
+        s_en <= 1;
+        s_add <= 0;
+        s_step <= 2;
+        s_zero <= 1;
+      end
+      */
+    end else timer <= timer - 1;
   end
+
+
+  //assign state = (state == S_OFF) ? on : (rst_state ? S_OFF : state);
+
 
 
 

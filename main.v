@@ -1,7 +1,7 @@
 // Новые точки объявлять перед экземплярами под соответствующим комментарием. Комментарий не стирать.
 // Назначать новые порты в экземплярах - в конце всех назначений под соответствующим комментарием. Комментарий не стирать.
 // НЕ ЗАБУДЬТЕ поставить запятую после ".rst(rst)", если добавляете новые порты.
-module main(x, y, s, b, on, start, regime, active, clk, rst);
+module main(x, y, s, b, on, start, regime, active, clk, rst, real_state);
   input [7:0] x;
   input [1:0] on;
   input start;
@@ -16,6 +16,7 @@ module main(x, y, s, b, on, start, regime, active, clk, rst);
   
   /* ОБЪЯВЛЕНИЯ ТОЧЕК */
   wire y_inc;
+  output [3:0] real_state;
   
   data_path _data_path(
     // данные
@@ -55,6 +56,7 @@ module main(x, y, s, b, on, start, regime, active, clk, rst);
     .clk(clk),
     .rst(rst),
     /* ДОБАВЛЕННЫЕ ПОРТЫ */
-    .y_inc(y_inc)
+    .y_inc(y_inc),
+    .real_state(real_state)
   );
 endmodule

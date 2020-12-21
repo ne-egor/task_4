@@ -3,7 +3,7 @@
 // Реализацию управляющего автомата дописывать под соответствующим комментарием в конце модуля. Комментарий не стирать.
 // По необходимости можно раскомментировать ключевые слова "reg" в объявлениях портов.
 module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en, y_store_x, s_add, s_zero, clk, rst, 
-      y_inc, real_state     /* , ... (ИМЕНА НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */);
+      y_inc    /* , ... (ИМЕНА НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */);
   
   input [1:0] on;
   input start, clk, rst;
@@ -20,7 +20,7 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
   
   /* ОБЪЯВЛЕНИЯ НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */
   input y_inc;
-  output reg [7:0] real_state;
+
 
   localparam S_OFF = 0, S_ELIST = 1, S_CNT = 2, S_UPDATE = 3;
   localparam S_6 = S_ELIST + 4,
@@ -48,10 +48,10 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
 
   always @(posedge clk, posedge rst) begin
     regime <= state;
-    real_state <= state;
     if (rst) begin
       state <= S_OFF;
       timer <= 0;
+      active <= 0;
     end else if (timer == 0) begin
       //state <= state;
       case (state)
@@ -171,7 +171,7 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
   always @* begin
     next_timer = 0;
     if ((state == S_6) || (state == S_0_PRE)) next_timer = 2;
-    if ((state == S_4) || (state == S_2) /*|| (state == S_0_PRE)*/) next_timer = 1;
+    if ((state == S_4) || (state == S_2)) next_timer = 1;
   end
 
 

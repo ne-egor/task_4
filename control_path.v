@@ -20,19 +20,23 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
   
   /* ОБЪЯВЛЕНИЯ НОВЫХ УПРАВЛЯЮЩИХ ПОРТОВ */
   input y_inc;
-  output reg [3:0] real_state;
+  output reg [7:0] real_state;
 
   localparam S_OFF = 0, S_ELIST = 1, S_CNT = 2, S_UPDATE = 3;
-  localparam S_6 = S_ELIST + 4, 
-             S_4 = S_ELIST + 8,
-             S_2 = S_ELIST + 12,
-             S_0 = S_ELIST + 16,
+  localparam S_6 = S_ELIST + 4,
+             S_4_PRE = S_ELIST + 8, 
+             S_4 = S_ELIST + 12,
+             S_2_PRE = S_ELIST + 16,
+             S_2 = S_ELIST + 20,
+             S_0_PRE = S_ELIST + 24,
+             S_0 = S_ELIST + 28,
+             
 
              S_UP_2 = S_UPDATE + 4,
              S_UP_3 = S_UPDATE + 8,
              S_UP_F = S_UPDATE + 12;
   
-  reg [3:0] state; 
+  reg [7:0] state; 
   //reg [3:0] state;
 
   reg [1:0] timer, next_timer;
@@ -57,29 +61,46 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
           y_en <= 0;
         end
         S_ELIST: if (start == 1) begin
-          active <= 1;
+          //active <= 1;
           state <= S_6;
         end
         S_6: begin
-          state <= S_4;
+          active <= 1;
+          state <= S_4_PRE;
           //set s = 6;
           s_en <= 1;
           s_add <= 0;
           s_step <= 2;
           s_zero <= 1;
         end
+        S_4_PRE: begin 
+          state <= S_4;
+          s_zero <= 0;
+        end
         S_4: begin
+          state <= S_2_PRE;
+          s_en <= 0; 
+        end
+        S_2_PRE: begin 
           state <= S_2;
-          //set s = 4;
-          // !!! only modify 6 to 4, mb change @* (ubrat timer), inache neskolko raz povtorit modif
-          // !!!!!!!!!!!!!!!!!!
-          s_zero <= 0; 
+          s_en <= 1;
         end
         S_2: begin
+          state <= S_0_PRE;
+          s_en <= 0; 
+        end
+        S_0_PRE: begin
           state <= S_0;
-          //set s = 6;
+          s_zero <= 1;
+          s_step <= 0;
+          s_en <= 1;
         end
         S_0: begin
+          s_en <= 1;
+          s_add <= 0;
+          s_step <= 2;
+          s_zero <= 1;
+          
           state <= S_OFF;
           active <= 0;
 
@@ -149,7 +170,8 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
   // вместо * мб state, или pos clk, или хз
   always @* begin
     next_timer = 0;
-    if ((state % 4 == S_ELIST) && (state != S_ELIST)) next_timer = 3;
+    if ((state == S_6) || (state == S_0_PRE)) next_timer = 2;
+    if ((state == S_4) || (state == S_2) /*|| (state == S_0_PRE)*/) next_timer = 1;
   end
 
 

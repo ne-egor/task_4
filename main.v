@@ -16,7 +16,7 @@ module main(x, y, s, b, on, start, regime, active, clk, rst, real_state);
   
   /* ОБЪЯВЛЕНИЯ ТОЧЕК */
   wire y_inc;
-  output [3:0] real_state;
+  output [7:0] real_state;
   
   data_path _data_path(
     // данные

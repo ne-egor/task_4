@@ -1,7 +1,7 @@
 module test();
     reg clk = 0;
     always #2 clk = !clk;
-    initial #75 $finish;
+    initial #95 $finish;
     
     reg [7:0] x;
     reg [1:0] on;
@@ -11,7 +11,7 @@ module test();
     wire [2:0] s;
     wire b, active;
     wire [1:0] regime;
-    wire [3:0] real_state;
+    wire [7:0] real_state;
 
     main _testee(.clk(clk), .rst(rst), .x(x), .on(on), .start(start), .y(y), .s(s), .b(b), .active(active), .regime(regime), .real_state(real_state));
 
@@ -27,7 +27,7 @@ module test();
         x = 5;
         #4 rst = 0; on = 0;
         #4 on = 3;
-        // #4 on = 1; start = 1;
+        #4 on = 1; start = 1;
 
 
     end

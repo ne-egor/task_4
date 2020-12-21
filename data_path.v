@@ -53,6 +53,6 @@ module data_path(x, y, s, b, y_select_next, s_step, y_en, s_en, y_store_x, s_add
   assign s_base = s_zero ? 0 : s;
   
   /* РЕАЛИЗАЦИЯ ПОДСХЕМ ДЛЯ ПРЕОБРАЗОВАНИЯ ДАННЫХ В УПРАВЛЕНИЕ */
-  assign y_inc = (s + 1 == 3);
+  assign y_inc = (s + 2 == 3);
 
 endmodule

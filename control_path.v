@@ -99,7 +99,8 @@ module control_path(on, start, regime, active, y_select_next, s_step, y_en, s_en
             y_select_next <= 1;
             y_store_x <= 0;
             y_en <= 1;
-          end
+          end else
+            y_en <= 0;
         end
 
         S_UPDATE: begin

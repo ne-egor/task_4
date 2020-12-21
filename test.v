@@ -1,7 +1,7 @@
 module test();
     reg clk = 0;
     always #2 clk = !clk;
-    initial #95 $finish;
+    initial #140 $finish;
     
     reg [7:0] x;
     reg [1:0] on;
@@ -27,7 +27,11 @@ module test();
         x = 5;
         #4 rst = 0; on = 0;
         #4 on = 3;
-        #4 on = 1; start = 1;
+        #4 on = 1; start = 0;
+        #8 x = 13;
+        #16 start = 1;
+        #8 on = 2;
+        #84 start = 0;
 
 
     end
